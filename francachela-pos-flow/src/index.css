@@ -1,0 +1,154 @@
+
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
+/* Paleta de colores personalizada para Francachela */
+@layer base {
+  :root {
+    --background: rgb(239 241 242); /* #EFF1F2 */
+    --foreground: rgb(41 49 85); /* #293155 */
+
+    --card: rgb(255 255 255);
+    --card-foreground: rgb(41 49 85);
+
+    --popover: rgb(255 255 255);
+    --popover-foreground: rgb(41 49 85);
+
+    --primary: rgb(41 49 85); /* #293155 */
+    --primary-foreground: rgb(239 241 242);
+
+    --secondary: rgb(187 186 197); /* #BBBAC5 */
+    --secondary-foreground: rgb(31 29 46);
+
+    --muted: rgb(187 186 197);
+    --muted-foreground: rgb(50 43 66);
+
+    --accent: rgb(50 43 66); /* #322B42 */
+    --accent-foreground: rgb(239 241 242);
+
+    --destructive: rgb(0 84.2% 60.2%);
+    --destructive-foreground: 210 40% 98%;
+
+    --border: rgb(187 186 197);
+    --input: rgb(239 241 242);
+    --ring: rgb(41 49 85);
+
+    --radius: 0.75rem;
+
+    /* Colores específicos de Francachela */
+    --francachela-dark: rgb(31 29 46); /* #1F1D2E */
+    --francachela-purple: rgb(50 43 66); /* #322B42 */
+    --francachela-light: rgb(187 186 197); /* #BBBAC5 */
+  }
+
+  .dark {
+    --background: rgb(31 29 46); /* #1F1D2E */
+    --foreground: rgb(239 241 242);
+
+    --card: rgb(31 29 46);
+    --card-foreground: rgb(239 241 242);
+
+    --popover: rgb(31 29 46);
+    --popover-foreground: rgb(239 241 242);
+
+    --primary: rgb(239 241 242);
+    --primary-foreground: rgb(41 49 85);
+
+    --secondary: rgb(50 43 66);
+    --secondary-foreground: rgb(239 241 242);
+
+    --muted: rgb(50 43 66);
+    --muted-foreground: rgb(187 186 197);
+
+    --accent: rgb(41 49 85);
+    --accent-foreground: rgb(239 241 242);
+
+    --border: rgb(50 43 66);
+    --input: rgb(50 43 66);
+    --ring: rgb(239 241 242);
+  }
+}
+@layer base {
+  * {
+    border-color: var(--border);
+    /*  @apply border-border;*/
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    /*@apply bg-background text-foreground;*/
+  }
+}
+
+/* Estilos personalizados para POS */
+@layer utilities {
+  .pos-button {
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+    transition-property: background-color, transform;
+    transition-duration: 200ms;
+    transition-timing-function: ease-in-out;
+    transform: scale(1);
+    transition: transform 200ms ease-in-out;
+           /*@apply bg-primary text-primary-foreground hover:bg-primary/90 
+           rounded-xl p-4 font-semibold text-lg transition-all duration-200
+           active:scale-95 touch-manipulation;*/
+  }
+  
+  .pos-card {
+    background-color: var(--card);
+    border-color: var(--border);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+    /*@apply bg-card border border-border rounded-2xl p-6 shadow-lg;*/
+  }
+  
+  .francachela-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--accent)) 100%);
+  }
+  
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    /*@apply min-h-[44px] min-w-[44px];*/
+  }
+}
+
+/* Animaciones personalizadas */
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
