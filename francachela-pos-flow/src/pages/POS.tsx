@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -112,8 +112,28 @@ const POS = () => {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [activeTicketId, setActiveTicketId] = useState<string>("");
   const [searchTerm, setSearchTerm] = useState("");
+  const [showSearchOverlay, setShowSearchOverlay] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [filteredProducts, setFilteredProducts] = useState<Product[]>(sampleProducts);
   const [selectedCategory, setSelectedCategory] = useState("Todos");
+  // 1. Añadir estado para overlay de categorías y cliente
+  const [showCategoryOverlay, setShowCategoryOverlay] = useState(false);
+  const [showClientModal, setShowClientModal] = useState(false);
+  const [clientSearch, setClientSearch] = useState("");
+  const [clients] = useState([
+    { id: "1", name: "Juan Pérez" },
+    { id: "2", name: "María López" },
+    { id: "3", name: "Carlos Ruiz" },
+  ]);
+  // Asociar cliente al ticket activo
+  const setClientToActiveTicket = (client: { id: string; name: string }) => {
+    setTickets(tickets.map(ticket =>
+      ticket.id === activeTicketId
+        ? { ...ticket, customer: client.name }
+        : ticket
+    ));
+    setShowClientModal(false);
+  };
 
   const categories = ["Todos", "Cerveza", "Pisco", "Vodka", "Ron", "Whisky"];
 
@@ -139,6 +159,21 @@ const POS = () => {
       createNewTicket();
     }
   }, []);
+
+  // Cerrar overlay al hacer clic fuera
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchInputRef.current && !searchInputRef.current.contains(event.target as Node)) {
+        setShowSearchOverlay(false);
+      }
+    }
+    if (showSearchOverlay) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showSearchOverlay]);
 
   // Filtrar productos
   useEffect(() => {
@@ -271,89 +306,94 @@ const POS = () => {
     createNewTicket();
   };
 
-  return (
-    <div className="h-full grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Panel de productos */}
-      <div className="lg:col-span-2 space-y-4">
-        {/* Búsqueda y filtros */}
-        <Card className="pos-card">
-          <CardContent className="p-4">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="flex-1 relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <Input
-                  placeholder="Buscar productos o escanear código de barras..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 pos-button !p-3"
-                />
-              </div>
-              <Button variant="outline" className="touch-target">
-                <ScanLine className="h-4 w-4 mr-2" />
-                Escáner
-              </Button>
-            </div>
-            
-            {/* Categorías */}
-            <div className="flex gap-2 mt-4 overflow-x-auto">
-              {categories.map((category) => (
-                <Button
-                  key={category}
-                  variant={selectedCategory === category ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category)}
-                  className="whitespace-nowrap touch-target"
-                >
-                  {category}
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+  // 2. Modificar categorías: eliminar 'Todos' y mostrar como overlay lateral
+  const filteredCategories = categories.filter(c => c !== "Todos");
 
-        {/* Lista de productos */}
-        <Card className="pos-card">
-          <CardHeader>
-            <CardTitle>Productos ({filteredProducts.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[400px] md:h-[500px]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="border rounded-xl p-4 hover:shadow-md transition-all duration-200 cursor-pointer"
-                    onClick={() => addToCart(product)}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <div className="w-12 h-12 bg-muted rounded-lg flex items-center justify-center">
-                        <Package className="h-6 w-6 text-muted-foreground" />
+  return (
+    <div className="h-full flex flex-col gap-6">
+      {/* Barra de búsqueda 100% ancho */}
+      <div className="w-full relative">
+        <div className="flex gap-2">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              ref={searchInputRef}
+              placeholder="Buscar productos o escanear código de barras..."
+              value={searchTerm}
+              onFocus={() => setShowSearchOverlay(true)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setShowSearchOverlay(true);
+              }}
+              className="pl-10 pos-button !p-3 w-full"
+            />
+            {/* Overlay de resultados de búsqueda */}
+            {showSearchOverlay && searchTerm && (
+              <div className="absolute z-50 bg-white border rounded shadow-lg w-full max-h-80 overflow-auto mt-2">
+                {filteredProducts.length === 0 ? (
+                  <div className="p-4 text-center text-muted-foreground">Sin resultados</div>
+                ) : (
+                  filteredProducts.map(product => (
+                    <div
+                      key={product.id}
+                      className="flex items-center justify-between px-4 py-2 hover:bg-muted cursor-pointer"
+                      onClick={() => {
+                        addToCart(product);
+                        setShowSearchOverlay(false);
+                        setSearchTerm("");
+                      }}
+                    >
+                      <div>
+                        <div className="font-semibold">{product.name}</div>
+                        <div className="text-xs text-muted-foreground">Stock: {product.stock}</div>
+                        <div className="font-bold text-primary">S/. {product.price.toFixed(2)}</div>
                       </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-sm">{product.name}</h3>
-                        <p className="text-lg font-bold text-primary">S/. {product.price.toFixed(2)}</p>
-                        <div className="flex items-center space-x-2 mt-1">
-                          <Badge variant={product.stock > 10 ? "default" : "destructive"} className="text-xs">
-                            Stock: {product.stock}
-                          </Badge>
-                          <span className="text-xs text-muted-foreground">{product.category}</span>
-                        </div>
-                      </div>
-                      <Button size="sm" className="touch-target">
-                        <Plus className="h-4 w-4" />
-                      </Button>
                     </div>
-                  </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+          {/* Botón para mostrar overlay de categorías */}
+          <Button variant="outline" className="touch-target" onClick={() => setShowCategoryOverlay(true)}>
+            <Package className="h-4 w-4 mr-2" />
+            Categorías
+          </Button>
+        </div>
+        {/* Overlay lateral de categorías */}
+        {showCategoryOverlay && (
+          <div className="fixed inset-0 z-50 flex">
+            <div className="bg-white shadow-lg w-64 h-full overflow-y-auto p-4">
+              <div className="flex justify-between items-center mb-4">
+                <span className="font-bold text-lg">Categorías</span>
+                <Button size="sm" variant="ghost" onClick={() => setShowCategoryOverlay(false)}>
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+              <div className="flex flex-col gap-2">
+                {filteredCategories.map((category) => (
+                  <Button
+                    key={category}
+                    variant={selectedCategory === category ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setShowCategoryOverlay(false);
+                    }}
+                    className="whitespace-nowrap touch-target"
+                  >
+                    {category}
+                  </Button>
                 ))}
               </div>
-            </ScrollArea>
-          </CardContent>
-        </Card>
+            </div>
+            <div className="flex-1" onClick={() => setShowCategoryOverlay(false)} />
+          </div>
+        )}
       </div>
-
-      {/* Panel de tickets y carrito */}
-      <div className="space-y-4">
-        {/* Gestión de tickets */}
+      {/* Carrito principal con tickets arriba */}
+      <div className="flex-1 flex flex-col gap-4">
+        {/* Gestión de tickets arriba */}
         <Card className="pos-card">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -384,7 +424,6 @@ const POS = () => {
                     <div className="text-sm font-bold text-primary">
                       S/. {ticket.total.toFixed(2)}
                     </div>
-                    
                     {tickets.length > 1 && (
                       <Button
                         size="sm"
@@ -404,22 +443,21 @@ const POS = () => {
             </ScrollArea>
           </CardContent>
         </Card>
-
         {/* Carrito activo */}
-        <Card className="pos-card">
+        <Card className="pos-card flex-1 flex flex-col">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">
                 <ShoppingCart className="h-5 w-5 inline mr-2" />
                 Carrito {activeTicket?.id}
               </CardTitle>
-              <Button variant="outline" size="sm" className="touch-target">
+              <Button variant="outline" size="sm" className="touch-target" onClick={() => setShowClientModal(true)}>
                 <User className="h-4 w-4 mr-1" />
-                Cliente
+                {activeTicket?.customer ? activeTicket.customer : "Cliente"}
               </Button>
             </div>
           </CardHeader>
-          <CardContent>
+          <CardContent className="flex-1 flex flex-col">
             <ScrollArea className="h-48 mb-4">
               {activeTicket?.items.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
@@ -436,7 +474,6 @@ const POS = () => {
                           S/. {item.price.toFixed(2)} c/u
                         </p>
                       </div>
-                      
                       <div className="flex items-center space-x-2">
                         <Button
                           size="sm"
@@ -446,11 +483,9 @@ const POS = () => {
                         >
                           <Minus className="h-3 w-3" />
                         </Button>
-                        
                         <span className="font-semibold min-w-[2rem] text-center">
                           {item.quantity}
                         </span>
-                        
                         <Button
                           size="sm"
                           variant="outline"
@@ -459,7 +494,6 @@ const POS = () => {
                         >
                           <Plus className="h-3 w-3" />
                         </Button>
-                        
                         <Button
                           size="sm"
                           variant="destructive"
@@ -469,7 +503,6 @@ const POS = () => {
                           <Trash2 className="h-3 w-3" />
                         </Button>
                       </div>
-                      
                       <div className="text-right">
                         <div className="font-bold">
                           S/. {(item.price * item.quantity).toFixed(2)}
@@ -480,9 +513,7 @@ const POS = () => {
                 </div>
               )}
             </ScrollArea>
-
             <Separator className="my-4" />
-
             {/* Total */}
             <div className="space-y-2">
               <div className="flex justify-between text-lg">
@@ -499,7 +530,6 @@ const POS = () => {
                 <span className="text-primary">S/. {((activeTicket?.total || 0) * 1.18).toFixed(2)}</span>
               </div>
             </div>
-
             {/* Botones de acción */}
             <div className="space-y-2 mt-6">
               <div className="grid grid-cols-2 gap-2">
@@ -512,7 +542,6 @@ const POS = () => {
                   Imprimir
                 </Button>
               </div>
-              
               {/* Métodos de pago */}
               <Tabs defaultValue="efectivo" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
@@ -529,7 +558,6 @@ const POS = () => {
                     <CreditCard className="h-3 w-3" />
                   </TabsTrigger>
                 </TabsList>
-                
                 <TabsContent value="efectivo">
                   <Button
                     onClick={() => processSale('efectivo')}
@@ -540,7 +568,6 @@ const POS = () => {
                     Pagar en Efectivo
                   </Button>
                 </TabsContent>
-                
                 <TabsContent value="yape">
                   <Button
                     onClick={() => processSale('Yape')}
@@ -551,7 +578,6 @@ const POS = () => {
                     Pagar con Yape
                   </Button>
                 </TabsContent>
-                
                 <TabsContent value="plin">
                   <Button
                     onClick={() => processSale('Plin')}
@@ -562,7 +588,6 @@ const POS = () => {
                     Pagar con Plin
                   </Button>
                 </TabsContent>
-                
                 <TabsContent value="tarjeta">
                   <Button
                     onClick={() => processSale('tarjeta')}
@@ -574,8 +599,11 @@ const POS = () => {
                   </Button>
                 </TabsContent>
               </Tabs>
-
-              <Button variant="outline" className="w-full touch-target">
+              <Button 
+                variant="outline" 
+                className="w-full touch-target mt-4"
+                onClick={() => alert("Ticket guardado")}
+              >
                 <Save className="h-4 w-4 mr-2" />
                 Guardar Ticket
               </Button>
@@ -583,8 +611,51 @@ const POS = () => {
           </CardContent>
         </Card>
       </div>
+      {/* Modal de cliente */}
+      {showClientModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+          <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md">
+            <div className="flex justify-between items-center mb-4">
+              <span className="font-bold text-lg">Seleccionar Cliente</span>
+              <Button size="sm" variant="ghost" onClick={() => setShowClientModal(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            <Input
+              placeholder="Buscar cliente..."
+              value={clientSearch}
+              onChange={e => setClientSearch(e.target.value)}
+              className="mb-4"
+            />
+            <div className="max-h-48 overflow-y-auto flex flex-col gap-2">
+              {clients.filter(c => c.name.toLowerCase().includes(clientSearch.toLowerCase())).map(client => (
+                <Button
+                  key={client.id}
+                  variant="outline"
+                  className="w-full justify-start"
+                  onClick={() => setClientToActiveTicket(client)}
+                >
+                  {client.name}
+                </Button>
+              ))}
+              <Button
+                variant="default"
+                className="w-full justify-start mt-2"
+                onClick={() => {
+                  if (clientSearch.trim()) {
+                    setClientToActiveTicket({ id: Date.now().toString(), name: clientSearch });
+                    setClientSearch("");
+                  }
+                }}
+              >
+                + Nuevo cliente: {clientSearch}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
-};
+}
 
 export default POS;
