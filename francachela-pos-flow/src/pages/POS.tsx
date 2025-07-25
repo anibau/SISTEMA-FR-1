@@ -41,12 +41,13 @@ interface CartItem extends Product {
   quantity: number;
 }
 
+// Modificar la interfaz Ticket para incluir estado de eliminación
 interface Ticket {
   id: string;
   items: CartItem[];
   customer?: string;
   total: number;
-  status: 'active' | 'saved' | 'completed';
+  status: 'active' | 'saved' | 'completed' | 'deleted';
   createdAt: Date;
 }
 
@@ -273,16 +274,29 @@ const POS = () => {
 
   // Eliminar ticket
   const deleteTicket = (ticketId: string) => {
-    const updatedTickets = tickets.filter(t => t.id !== ticketId);
-    setTickets(updatedTickets);
+    setTickets(tickets.map(ticket =>
+      ticket.id === ticketId
+        ? { ...ticket, status: 'deleted' }
+        : ticket
+    ));
     
     if (ticketId === activeTicketId) {
-      if (updatedTickets.length > 0) {
-        setActiveTicketId(updatedTickets[0].id);
+      const activeTickets = tickets.filter(t => t.status !== 'deleted');
+      if (activeTickets.length > 0) {
+        setActiveTicketId(activeTickets[0].id);
       } else {
         createNewTicket();
       }
     }
+  };
+
+  // Función para restaurar ticket eliminado
+  const restoreTicket = (ticketId: string) => {
+    setTickets(tickets.map(ticket =>
+      ticket.id === ticketId
+        ? { ...ticket, status: 'active' }
+        : ticket
+    ));
   };
 
   // Procesar venta
@@ -308,6 +322,9 @@ const POS = () => {
 
   // 2. Modificar categorías: eliminar 'Todos' y mostrar como overlay lateral
   const filteredCategories = categories.filter(c => c !== "Todos");
+
+  // Obtener tickets activos (no eliminados)
+  const activeTickets = tickets.filter(t => t.status !== 'deleted');
 
   return (
     <div className="h-full flex flex-col gap-6">
@@ -393,42 +410,35 @@ const POS = () => {
       </div>
       {/* Carrito principal con tickets arriba */}
       <div className="flex-1 flex flex-col gap-4">
-        {/* Gestión de tickets arriba */}
-        <Card className="pos-card">
-          <CardHeader className="pb-3">
+        {/* Gestión de tickets arriba - Solo bloque superior como en la imagen */}
+        <Card className="pos-card border-blue-500 bg-blue-50">
+          <CardContent className="">
             <div className="flex items-center justify-between">
-              <CardTitle className="text-lg">Tickets ({tickets.length})</CardTitle>
-              <Button onClick={createNewTicket} size="sm" className="touch-target">
-                <Plus className="h-4 w-4 mr-1" />
-                Nuevo
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-20">
               <div className="flex gap-2 overflow-x-auto">
-                {tickets.map((ticket) => (
+                {activeTickets.map((ticket) => (
                   <div
                     key={ticket.id}
-                    className={`border rounded-lg p-3 min-w-[120px] cursor-pointer transition-all relative ${
+                    className={`border-2 rounded-lg p-3 min-w-[140px] cursor-pointer transition-all relative m-2 ${
                       ticket.id === activeTicketId
-                        ? 'border-primary bg-primary/10'
-                        : 'border-border hover:border-primary/50'
+                        ? 'border-blue-600 bg-blue-100 shadow-lg'
+                        : 'border-gray-300 bg-white hover:border-blue-400 hover:bg-blue-50'
                     }`}
                     onClick={() => setActiveTicketId(ticket.id)}
                   >
-                    <div className="text-sm font-semibold">{ticket.id}</div>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm font-semibold text-gray-800">{ticket.id}</div>
+                    <div className="text-xs text-gray-600">
                       {ticket.items.length} items
                     </div>
-                    <div className="text-sm font-bold text-primary">
+                    <div className="text-sm font-bold text-blue-600">
                       S/. {ticket.total.toFixed(2)}
                     </div>
-                    {tickets.length > 1 && (
+                    
+                    {/* Botón de eliminar */}
+                    {activeTickets.length > 1 && (
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="absolute -top-2 -right-2 h-6 w-6 p-0 bg-purple-700 text-white hover:bg-purple-500"
                         onClick={(e) => {
                           e.stopPropagation();
                           deleteTicket(ticket.id);
@@ -440,7 +450,11 @@ const POS = () => {
                   </div>
                 ))}
               </div>
-            </ScrollArea>
+              <Button onClick={createNewTicket} size="sm" className="touch-target bg-blue-600 hover:bg-blue-700 text-white">
+                <Plus className="h-4 w-4 mr-1" />
+                Nuevo
+              </Button>
+            </div>
           </CardContent>
         </Card>
         {/* Carrito activo */}
