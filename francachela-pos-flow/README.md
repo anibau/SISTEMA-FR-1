@@ -1,73 +1,260 @@
-# Welcome to your Lovable project
+# 🍺 Francachela POS - Sistema de Punto de Venta
 
-## Project info
+Sistema moderno de gestión para licorería con interfaz táctil, gestión de inventario, clientes y reportes.
 
-**URL**: https://lovable.dev/projects/9558839d-e3f5-4035-a8bf-e471a09ea32f
+## 🚀 Características
 
-## How can I edit this code?
+- **POS Táctil**: Interfaz optimizada para tablets y pantallas táctiles
+- **Gestión de Productos**: CRUD completo con códigos de barras
+- **Sistema de Clientes**: Fidelización y puntos
+- **Promociones**: Descuentos automáticos y combos
+- **Reportes**: Métricas en tiempo real
+- **Multitickets**: Múltiples ventas simultáneas
+- **Métodos de Pago**: Efectivo, Yape, Plin, Transferencia
+- **Modo Offline**: Funciona sin conexión con mocks
 
-There are several ways of editing your application.
+## 🛠️ Tecnologías
 
-**Use Lovable**
+- **Frontend**: React 18 + TypeScript + Vite
+- **UI**: Tailwind CSS + shadcn/ui
+- **State Management**: Zustand + React Query
+- **HTTP Client**: Axios
+- **Routing**: React Router DOM
+- **Icons**: Lucide React
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/9558839d-e3f5-4035-a8bf-e471a09ea32f) and start prompting.
+## 📦 Instalación
 
-Changes made via Lovable will be committed automatically to this repo.
+```bash
+# Clonar repositorio
+git clone <repository-url>
+cd francachela-pos-flow
 
-**Use your preferred IDE**
+# Instalar dependencias
+npm install
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+# Configurar variables de entorno
+cp env.example .env.local
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Ejecutar en desarrollo
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## ⚙️ Configuración
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### Variables de Entorno
 
-**Use GitHub Codespaces**
+Crea un archivo `.env.local` basado en `env.example`:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```env
+# Configuración de la API
+VITE_API_URL=http://localhost:3000/api/v1
 
-## What technologies are used for this project?
+# Configuración de desarrollo
+VITE_USE_MOCKS=true
+VITE_DEBUG_MODE=true
 
-This project is built with:
+# Configuración de la aplicación
+VITE_APP_NAME=Francachela POS
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Modo Mocks
 
-## How can I deploy this project?
+Para desarrollo sin backend, activa los mocks:
 
-Simply open [Lovable](https://lovable.dev/projects/9558839d-e3f5-4035-a8bf-e471a09ea32f) and click on Share -> Publish.
+```env
+VITE_USE_MOCKS=true
+```
 
-## Can I connect a custom domain to my Lovable project?
+Los mocks incluyen:
+- Productos de ejemplo (cervezas, piscos, vodkas, etc.)
+- Clientes de prueba
+- Promociones simuladas
+- Ventas de ejemplo
 
-Yes, you can!
+### Conectar con Backend
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+Para usar con el backend real:
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```env
+VITE_USE_MOCKS=false
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+## 🏗️ Estructura del Proyecto
+
+```
+src/
+├── components/          # Componentes reutilizables
+│   ├── ui/             # Componentes base (shadcn/ui)
+│   ├── layout/         # Layout y navegación
+│   └── pos/            # Componentes específicos del POS
+├── hooks/              # Hooks personalizados
+│   ├── useAuth.ts      # Autenticación
+│   ├── useProducts.ts  # Gestión de productos
+│   └── use-mobile.tsx  # Detección de móvil
+├── pages/              # Páginas de la aplicación
+│   ├── POS.tsx         # Punto de venta principal
+│   ├── Dashboard.tsx   # Dashboard con métricas
+│   ├── Inventory.tsx   # Gestión de inventario
+│   └── ...
+├── services/           # Servicios API
+│   ├── api.ts          # Cliente HTTP base
+│   ├── auth.service.ts # Autenticación
+│   ├── products.service.ts # Productos
+│   ├── customers.service.ts # Clientes
+│   ├── sales.service.ts # Ventas
+│   ├── promotions.service.ts # Promociones
+│   └── mocks.ts        # Datos simulados
+├── store/              # Estado global (Zustand)
+│   ├── pos.store.ts    # Store del POS
+│   └── pos.store.new.ts # Store actualizado con API
+└── types/              # Tipos TypeScript
+    └── pos.types.ts    # Tipos del sistema
+```
+
+## 🔧 Servicios API
+
+### Cliente HTTP Base (`api.ts`)
+
+- Interceptores para autenticación JWT
+- Manejo global de errores
+- Configuración de CORS
+- Soporte para mocks
+
+### Servicios Disponibles
+
+1. **AuthService**: Login, logout, refresh token
+2. **ProductsService**: CRUD productos, búsqueda, import/export
+3. **CustomersService**: Gestión clientes, puntos, estadísticas
+4. **SalesService**: Ventas, reportes, estadísticas
+5. **PromotionsService**: Promociones, validación, aplicación
+
+### Hooks React Query
+
+- `useProducts()`: Lista y gestión de productos
+- `useAuth()`: Autenticación y permisos
+- `useCustomers()`: Gestión de clientes
+- `useSales()`: Ventas y reportes
+
+## 🎯 Funcionalidades del POS
+
+### Búsqueda de Productos
+- Por nombre
+- Por código de barras
+- Por categoría
+- Filtros de precio y stock
+
+### Gestión de Carrito
+- Agregar/remover productos
+- Modificar cantidades
+- Validación de stock
+- Cálculo automático de totales
+
+### Clientes
+- Búsqueda rápida
+- Creación automática
+- Sistema de puntos
+- Historial de compras
+
+### Métodos de Pago
+- Efectivo
+- Yape
+- Plin
+- Transferencia
+- Tarjeta
+
+### Multitickets
+- Múltiples ventas simultáneas
+- Guardar tickets pendientes
+- Restaurar tickets eliminados
+
+## 📱 Responsive Design
+
+- Optimizado para tablets (768px+)
+- Interfaz táctil
+- Botones grandes para fácil uso
+- Modo oscuro/claro
+
+## 🚀 Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run dev
+
+# Build de producción
+npm run build
+
+# Preview de producción
+npm run preview
+
+# Linting
+npm run lint
+```
+
+## 🔐 Autenticación
+
+### Roles Disponibles
+- **Admin**: Acceso completo
+- **Vendedor**: Gestión de ventas e inventario
+- **Cajero**: Solo procesar ventas
+
+### Permisos
+- Gestión de productos
+- Gestión de usuarios
+- Reportes
+- Promociones
+- Inventario
+- Clientes
+
+## 📊 Reportes
+
+- Ventas diarias/mensuales
+- Productos más vendidos
+- Clientes top
+- Stock bajo
+- Métricas de rendimiento
+
+## 🔄 Integración con Backend
+
+El sistema está preparado para integrarse con el backend NestJS:
+
+1. **Configurar URL de API** en `.env.local`
+2. **Desactivar mocks** (`VITE_USE_MOCKS=false`)
+3. **Configurar autenticación JWT**
+4. **Sincronizar tipos** con el backend
+
+## 🐛 Debugging
+
+### Modo Debug
+```env
+VITE_DEBUG_MODE=true
+```
+
+### Logs de Desarrollo
+- Errores de API en consola
+- Estado de mocks
+- Performance de queries
+
+## 📝 Contribución
+
+1. Fork el proyecto
+2. Crear rama feature (`git checkout -b feature/AmazingFeature`)
+3. Commit cambios (`git commit -m 'Add AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abrir Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
+
+## 🆘 Soporte
+
+Para soporte técnico:
+- Revisar documentación de NestJS
+- Consultar issues del repositorio
+- Contactar al equipo de desarrollo
+
+---
+
+**¡Manos a la obra! 🚀**
+*El sistema Francachela está listo para revolucionar tu licorería*

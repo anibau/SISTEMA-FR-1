@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { showSuccess } from "@/lib/toast";
 import {
   Search,
   ShoppingCart,
@@ -155,7 +156,7 @@ const Catalog = () => {
     } else {
       // Fallback para copiar al portapapeles
       navigator.clipboard.writeText(`${product.name} - S/. ${product.price.toFixed(2)} - ${window.location.href}`);
-      alert('Enlace copiado al portapapeles');
+      showSuccess('Enlace copiado al portapapeles');
     }
   };
 

@@ -351,7 +351,7 @@ const Sales = () => {
                               <div>
                                 <div className="flex items-center space-x-2">
                                   <h3 className="font-semibold text-lg">{sale.ticketNumber}</h3>
-                                  <Badge variant={statusBadge.variant as any}>
+                                  <Badge variant={statusBadge.variant as "default" | "secondary" | "destructive" | "outline"}>
                                     {statusBadge.text}
                                   </Badge>
                                 </div>
