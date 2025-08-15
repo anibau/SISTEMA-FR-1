@@ -27,6 +27,9 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Client } from "@/types/pos.types";
 import { showSuccess } from "@/lib/toast";
+import NewClient from "@/components/pos/NewClient";
+import useToggle from "@/hooks/useToogle";
+
 
 const POS = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -37,6 +40,7 @@ const POS = () => {
   const [showCategoryOverlay, setShowCategoryOverlay] = useState(false);
   const [showClientModal, setShowClientModal] = useState(false);
   const [clientSearch, setClientSearch] = useState("");
+  const { state: showNewClientModal, on: onNewClient, off: offNewClient } = useToggle();
 
   // Estado global
   const {
@@ -263,24 +267,22 @@ const POS = () => {
                   </Button>
                 ))
               }
-              <Button
-                variant="default"
-                className="w-full justify-start mt-2"
-                onClick={() => {
-                  if (clientSearch.trim()) {
-                    handleClientSelect({
-                      id: Date.now().toString(),
-                      name: clientSearch
-                    });
-                  }
-                }}
-              >
-                + Nuevo cliente: {clientSearch}
-              </Button>
+            <Button
+              variant="default"
+              className="w-full justify-start mt-2"
+              onClick={() => {
+                setShowClientModal(false);
+                onNewClient();
+              }}
+            >
+              + Nuevo cliente
+            </Button>
             </div>
           </div>
         </div>
       )}
+      {showNewClientModal && <NewClient isOpen={showNewClientModal} onClose={offNewClient} />}
+
     </div>
   );
 };
