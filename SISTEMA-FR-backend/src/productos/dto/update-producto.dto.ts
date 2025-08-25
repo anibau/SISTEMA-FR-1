@@ -3,5 +3,7 @@ import { CreateProductoDto } from './create-producto.dto';
 
 export class UpdateProductoDto extends PartialType(
   OmitType(CreateProductoDto, ['codigo'] as const)
-) {}
+) {
+  historialPrecios?: { precio: number; fecha: Date; usuario: string; motivo?: string }[];
+}
 

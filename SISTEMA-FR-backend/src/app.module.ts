@@ -5,8 +5,8 @@ import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 
 // Configuraciones
 import { DatabaseModule } from './database/database.module';
-import appConfig from './config/app.config';
-import databaseConfig from './config/database.config';
+import {appConfig} from './config/app.config';
+import {databaseConfig} from './config/database.config';
 
 // Módulos de la aplicación
 import { AuthModule } from './auth/auth.module';
