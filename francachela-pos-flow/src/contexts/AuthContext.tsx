@@ -61,11 +61,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.setItem('auth_token', authData.token);
       
       // Actualizar estado del usuario
-      setUser(authData.user);
-      
-      showSuccess(`Bienvenido, ${authData.user.name}`);
+      if (authData && authData.user) {
+        setUser(authData.user);
+        showSuccess(`Bienvenido, ${authData.user.name}`);
+      } else {
+        throw new Error('No se recibió información de usuario válida');
+      }
     } catch (error) {
       console.error('Login error:', error);
+      showError('Error al iniciar sesión. Por favor, verifica tus credenciales.');
       throw error;
     } finally {
       setIsLoading(false);

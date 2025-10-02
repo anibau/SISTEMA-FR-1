@@ -158,10 +158,7 @@ const Inventory = () => {
             <Upload className="h-4 w-4 mr-2" />
             Importar
           </Button>
-          <Button className="pos-button">
-            <Plus className="h-4 w-4 mr-2" />
-            Nuevo Producto
-          </Button>
+         
         </div>
       </div>
 

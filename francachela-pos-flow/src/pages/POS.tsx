@@ -147,7 +147,7 @@ const POS = () => {
 
   return (
     <div className="h-full flex flex-col gap-6">
-      {/* Barra de búsqueda y categorías */}
+      {/* Barra de búsqueda */}
       <div className="flex gap-2">
         <SearchBar
           searchTerm={searchTerm}
@@ -162,14 +162,7 @@ const POS = () => {
           setShowOverlay={setShowSearchOverlay}
         />
         
-        <Button 
-          variant="outline" 
-          className="touch-target" 
-          onClick={() => setShowCategoryOverlay(true)}
-        >
-          <Package className="h-4 w-4 mr-2" />
-          Categorías
-        </Button>
+        
       </div>
 
       <div className="flex-1 flex flex-col gap-4">

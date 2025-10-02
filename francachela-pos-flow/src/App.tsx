@@ -10,6 +10,7 @@ import Index from "./pages/Index";
 import POS from "./pages/POS";
 import Dashboard from "./pages/Dashboard";
 import Inventory from "./pages/Inventory";
+import ProductsManagement from "./pages/ProductsManagement";
 import Customers from "./pages/Customers";
 import Sales from "./pages/Sales";
 import Promotions from "./pages/Promotions";
@@ -17,6 +18,10 @@ import Catalog from "./pages/Catalog";
 import Login from "./pages/Login";
 import Unauthorized from "./pages/Unauthorized";
 import NotFound from "./pages/NotFound";
+import Expenses from "./pages/Expenses";
+import Points from "./pages/Points";
+import Delivery from "./pages/Delivery";
+import Configuration from "./pages/Configuration";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -56,9 +61,14 @@ const App = () => (
               <Route path="pos" element={<POS />} />
               <Route path="dashboard" element={<Dashboard />} />
               <Route path="inventario" element={<Inventory />} />
+              <Route path="productos" element={<ProductsManagement />} />
               <Route path="clientes" element={<Customers />} />
               <Route path="ventas" element={<Sales />} />
               <Route path="promociones" element={<Promotions />} />
+              <Route path="gastos" element={<Expenses />} />
+              <Route path="puntos" element={<Points />} />
+              <Route path="delivery" element={<Delivery />} />
+              <Route path="configuracion" element={<Configuration />} />
             </Route>
             
             {/* Ruta catch-all para 404 */}

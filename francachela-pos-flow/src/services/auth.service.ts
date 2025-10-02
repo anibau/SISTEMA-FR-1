@@ -1,4 +1,4 @@
-import { apiClient, extractData } from './api';
+import { apiClient, extractData, extractDirectData, ApiResponse } from './api';
 import { mockApi } from './mocks';
 import { LoginCredentials, AuthResponse, User } from '@/types/pos.types';
 
@@ -25,7 +25,7 @@ export class AuthService {
     }
 
     const response = await apiClient.post<AuthResponse>('/auth/login', credentials);
-    const authData = extractData(response);
+    const authData = extractDirectData(response);
     
     // Guardar token en localStorage
     localStorage.setItem('auth_token', authData.token);
@@ -54,7 +54,11 @@ export class AuthService {
   async getCurrentUser(): Promise<User | null> {
     const userStr = localStorage.getItem('user');
     if (userStr) {
-      return JSON.parse(userStr);
+      try {
+        return JSON.parse(userStr) as User;
+      } catch (e) {
+        localStorage.removeItem('user');
+      }
     }
 
     if (apiClient.shouldUseMocks()) {
@@ -63,7 +67,7 @@ export class AuthService {
 
     try {
       const response = await apiClient.get<User>('/auth/profile');
-      const user = extractData(response);
+      const user = extractDirectData(response);
       localStorage.setItem('user', JSON.stringify(user));
       return user;
     } catch (error) {
@@ -84,7 +88,7 @@ export class AuthService {
     }
 
     const response = await apiClient.post<AuthResponse>('/auth/refresh');
-    const authData = extractData(response);
+    const authData = extractDirectData(response);
     
     localStorage.setItem('auth_token', authData.token);
     localStorage.setItem('user', JSON.stringify(authData.user));
@@ -118,4 +122,5 @@ export class AuthService {
 }
 
 // Exportar instancia singleton
+// Exportar instancia del servicio
 export const authService = AuthService.getInstance(); 

@@ -2,11 +2,20 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  cost?: number;
   barcode?: string;
+  sku?: string;
   stock: number;
+  minStock?: number;
   category: string;
+  brand?: string;
+  supplier?: string;
+  description?: string;
   image?: string;
   isActive?: boolean;
+  isFeatured?: boolean;
+  location?: string;
+  unitOfMeasure?: string;
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -117,6 +126,66 @@ export interface ApiResponse<T> {
   message?: string;
   success: boolean;
   meta?: PaginationMeta;
+}
+
+export interface SearchFilters {
+  category?: string;
+  brand?: string;
+  supplier?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  inStock?: boolean;
+  isActive?: boolean;
+  isFeatured?: boolean;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
+export interface ProductBrand {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+}
+
+export interface ProductSupplier {
+  id: string;
+  name: string;
+  contactPerson?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  isActive: boolean;
+}
+
+export interface InventoryStats {
+  totalProducts: number;
+  totalCategories: number;
+  totalBrands: number;
+  totalSuppliers: number;
+  lowStockCount: number;
+  outOfStockCount: number;
+  averageCost: number;
+  totalValue: number;
+  mostSoldProducts: { id: string; name: string; quantity: number }[];
+}
+
+export interface BulkPriceUpdate {
+  productIds: string[];
+  updateType: 'fixed' | 'percentage';
+  value: number;
+}
+
+export interface StockAdjustment {
+  productId: string;
+  quantity: number;
+  reason: string;
+  notes?: string;
 }
 
 export interface SearchFilters {

@@ -9,7 +9,11 @@ import {
   TrendingUp,
   Gift,
   Menu,
-  Smartphone
+  Smartphone,
+  DollarSign,
+  Award,
+  Truck,
+  Settings
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -35,6 +39,11 @@ const menuItems = [
     icon: Package,
   },
   {
+    title: "Productos",
+    href: "/productos",
+    icon: Package,
+  },
+  {
     title: "Clientes",
     href: "/clientes",
     icon: Users,
@@ -48,6 +57,26 @@ const menuItems = [
     title: "Promociones",
     href: "/promociones",
     icon: Gift,
+  },
+  {
+    title: "Gastos",
+    href: "/gastos",
+    icon: DollarSign,
+  },
+  {
+    title: "Puntos",
+    href: "/puntos",
+    icon: Award,
+  },
+  {
+    title: "Delivery",
+    href: "/delivery",
+    icon: Truck,
+  },
+  {
+    title: "Configuración",
+    href: "/configuracion",
+    icon: Settings,
   },
 ];
 

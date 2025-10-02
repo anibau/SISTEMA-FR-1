@@ -138,6 +138,11 @@ export const extractData = <T>(response: AxiosResponse<ApiResponse<T>>): T => {
   return response.data.data;
 };
 
+// Helper para extraer datos directamente cuando la API no sigue el formato estándar
+export const extractDirectData = <T>(response: AxiosResponse<T>): T => {
+  return response.data;
+};
+
 // Helper para manejar respuestas paginadas
 export const extractPaginatedData = <T>(response: AxiosResponse<PaginatedResponse<T>>) => {
   return {
