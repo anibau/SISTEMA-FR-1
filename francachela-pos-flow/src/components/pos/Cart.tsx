@@ -1,9 +1,26 @@
-import { ShoppingCart, User, Calculator, Printer, Save, Minus, Plus, Trash2 } from "lucide-react";
+import { 
+  ShoppingCart, 
+  User, 
+  Calculator, 
+  Printer, 
+  Save, 
+  Minus, 
+  Plus, 
+  Trash2,
+  Banknote,
+  CreditCard,
+  Smartphone,
+  X,
+  Landmark,
+  QrCode
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { CartItem as CartItemType, Ticket } from "@/types/pos.types";
+import { Textarea } from "@/components/ui/textarea";
+import { useState, useEffect } from "react";
 
 interface CartProps {
   ticket: Ticket | undefined;
@@ -11,7 +28,9 @@ interface CartProps {
   onRemoveItem: (productId: string) => void;
   onClientClick: () => void;
   onProcessPayment: (method: string) => void;
+  onProcessSale: () => void;  // New function to process sale directly
   onSaveTicket: () => void;
+  onUpdateObservations?: (observations: string) => void;
 }
 
 export const Cart = ({
@@ -20,8 +39,49 @@ export const Cart = ({
   onRemoveItem,
   onClientClick,
   onProcessPayment,
+  onProcessSale,
   onSaveTicket,
+  onUpdateObservations,
 }: CartProps) => {
+  const [observations, setObservations] = useState("");
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  
+  // Update local state when the ticket changes
+  useEffect(() => {
+    if (ticket?.observations) {
+      setObservations(ticket.observations);
+    } else {
+      setObservations("");
+    }
+  }, [ticket]);
+  
+  // Handle observations change
+  const handleObservationsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setObservations(newValue);
+    
+    if (ticket && onUpdateObservations) {
+      onUpdateObservations(newValue);
+    }
+  };
+  
+  // Handle calculator click
+  const handleCalculatorClick = () => {
+    // Open Windows calculator
+    window.open("calculator://", "_blank");
+  };
+  
+  // Handle process sale button click
+  const handleProcessSaleClick = () => {
+    setShowPaymentModal(true);
+  };
+  
+  // Handle payment method selection
+  const handlePaymentMethodSelect = (method: string) => {
+    onProcessPayment(method);
+    setShowPaymentModal(false);
+  };
+  
   return (
     <Card className="pos-card flex-1 flex flex-col">
       <CardHeader className="pb-3">
@@ -63,12 +123,23 @@ export const Cart = ({
         
         <div className="space-y-2 mt-6">
           <CartActions
-            onProcessPayment={onProcessPayment}
+            onProcessPayment={handlePaymentMethodSelect}
+            onProcessSale={handleProcessSaleClick}
             onSaveTicket={onSaveTicket}
             disabled={!ticket?.items.length}
+            observations={observations}
+            handleObservationsChange={handleObservationsChange}
           />
         </div>
       </CardContent>
+      
+      {/* Payment Modal */}
+      <ProcessSaleModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        onConfirm={handlePaymentMethodSelect}
+        totalAmount={ticket?.total || 0}
+      />
     </Card>
   );
 };
@@ -144,64 +215,145 @@ const CartTotals = ({ ticket }: { ticket: Ticket | undefined }) => (
   </div>
 );
 
+// Payment selection modal
+interface ProcessSaleModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (paymentMethod: string) => void;
+  totalAmount: number;
+}
+
+const ProcessSaleModal = ({ isOpen, onClose, onConfirm, totalAmount }: ProcessSaleModalProps) => {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 animate-fadeIn">
+      <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-md animate-scaleIn">
+        <h2 className="text-xl font-bold mb-4 flex items-center justify-between">
+          <span>Finalizar Venta</span>
+          <Button variant="ghost" size="sm" onClick={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </h2>
+        
+        <div className="mb-6">
+          <p className="text-sm text-muted-foreground">Total a pagar:</p>
+          <p className="text-2xl font-bold text-primary">S/. {(totalAmount * 1.18).toFixed(2)}</p>
+        </div>
+        
+        <p className="text-sm font-medium mb-3">Seleccione método de pago:</p>
+        
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <Button 
+            className="bg-green-600 hover:bg-green-700 text-white h-20 flex flex-col" 
+            onClick={() => onConfirm("efectivo")}
+          >
+            <Banknote className="h-6 w-6 mb-2" />
+            <span className="font-medium">Efectivo</span>
+          </Button>
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700 text-white h-20 flex flex-col"
+            onClick={() => onConfirm("tarjeta")}
+          >
+            <CreditCard className="h-6 w-6 mb-2" />
+            <span className="font-medium">Tarjeta</span>
+          </Button>
+          <Button 
+            className="bg-purple-600 hover:bg-purple-700 text-white h-20 flex flex-col"
+            onClick={() => onConfirm("yape")}
+          >
+            <Smartphone className="h-6 w-6 mb-2" />
+            <span className="font-medium">Yape</span>
+          </Button>
+          <Button 
+            className="bg-orange-600 hover:bg-orange-700 text-white h-20 flex flex-col"
+            onClick={() => onConfirm("plin")}
+          >
+            <Smartphone className="h-6 w-6 mb-2" />
+            <span className="font-medium">Plin</span>
+          </Button>
+        </div>
+        
+        <Button 
+          variant="outline" 
+          className="w-full"
+          onClick={onClose}
+        >
+          Cancelar
+        </Button>
+      </div>
+    </div>
+  );
+};
+
 const CartActions = ({
   onProcessPayment,
+  onProcessSale,
   onSaveTicket,
-  disabled
+  disabled,
+  observations,
+  handleObservationsChange
 }: {
   onProcessPayment: (method: string) => void;
+  onProcessSale: () => void;
   onSaveTicket: () => void;
   disabled: boolean;
-}) => (
-  <>
-    <div className="grid grid-cols-2 gap-2">
-      <Button variant="outline" className="touch-target">
-        <Calculator className="h-4 w-4 mr-1" />
-        Calcular
-      </Button>
-      <Button variant="outline" className="touch-target">
-        <Printer className="h-4 w-4 mr-1" />
-        Imprimir
-      </Button>
-    </div>
-    <div className="grid grid-cols-4 gap-2">
-      <Button
-        onClick={() => onProcessPayment('efectivo')}
-        className="w-full bg-green-600 hover:bg-green-700 text-white text-xs"
+  observations: string;
+  handleObservationsChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
+}) => {
+  // Function to open Windows calculator
+  const handleCalculatorClick = () => {
+    // Using calc: URL scheme to open calculator on Windows
+    window.open("calc:");
+  };
+
+  return (
+    <>
+      <div className="grid grid-cols-2 gap-2">
+        <Button 
+          variant="outline" 
+          className="touch-target"
+          onClick={handleCalculatorClick}
+        >
+          <Calculator className="h-4 w-4 mr-1" />
+          Calcular
+        </Button>
+        <Button variant="outline" className="touch-target">
+          <Printer className="h-4 w-4 mr-1" />
+          Imprimir
+        </Button>
+      </div>
+      <div className="mb-4 mt-4">
+        <p className="text-sm text-muted-foreground mb-1">Observaciones:</p>
+        <Textarea
+          placeholder="Agregar observaciones al ticket..."
+          value={observations}
+          onChange={handleObservationsChange}
+          className="h-4 text-sm"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 gap-2 mt-4">
+        <Button 
+          variant="outline" 
+          className="touch-target w-full"
+          onClick={onSaveTicket}
+          disabled={disabled}
+        >
+          <Save className="h-4 w-4 mr-2" />
+          Guardar Ticket
+        </Button>
+      </div>
+      
+      <Button 
+        variant="default"
+        className="touch-target mt-2 bg-green-600 hover:bg-green-700 text-white font-medium py-3 w-full"
+        onClick={onProcessSale}
         disabled={disabled}
       >
-        Efectivo
+        <ShoppingCart className="h-5 w-5 mr-2" />
+        Pasar Venta
       </Button>
-      <Button
-        onClick={() => onProcessPayment('tarjeta')}
-        className="w-full bg-blue-600 hover:bg-blue-700 text-white text-xs"
-        disabled={disabled}
-      >
-        Tarjeta
-      </Button>
-      <Button
-        onClick={() => onProcessPayment('yape')}
-        className="w-full bg-purple-600 hover:bg-purple-700 text-white text-xs"
-        disabled={disabled}
-      >
-        Yape
-      </Button>
-      <Button
-        onClick={() => onProcessPayment('plin')}
-        className="w-full bg-orange-600 hover:bg-orange-700 text-white text-xs"
-        disabled={disabled}
-      >
-        Plin
-      </Button>
-    </div>
-    <Button 
-      variant="outline" 
-      className="w-full touch-target mt-4"
-      onClick={onSaveTicket}
-      disabled={disabled}
-    >
-      <Save className="h-4 w-4 mr-2" />
-      Guardar Ticket
-    </Button>
-  </>
-);
+    </>
+  );
+};

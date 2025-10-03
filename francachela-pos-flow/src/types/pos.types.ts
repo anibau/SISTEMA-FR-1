@@ -31,6 +31,7 @@ export interface Ticket {
   total: number;
   status: 'active' | 'saved' | 'completed' | 'deleted';
   createdAt: Date;
+  observations?: string;
 }
 
 export interface PaymentMethod {

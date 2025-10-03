@@ -29,6 +29,13 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { 
   Dialog, 
   DialogContent, 
@@ -303,18 +310,22 @@ const PointsPage = () => {
   };
   
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 bg-background min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Sistema de Puntos</h1>
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           <Button
             variant="outline"
+            className="border-primary/30 hover:bg-primary/10"
             onClick={() => setShowConfigDialog(true)}
             disabled={user?.role !== 'admin'}
           >
             <Settings className="mr-2 h-4 w-4" /> Configuración
           </Button>
-          <Button onClick={() => setShowTransactionDialog(true)}>
+          <Button 
+            className="bg-primary hover:bg-primary/90 text-white shadow-md"
+            onClick={() => setShowTransactionDialog(true)}
+          >
             <Plus className="mr-2 h-4 w-4" /> Nueva Transacción
           </Button>
         </div>
@@ -322,7 +333,7 @@ const PointsPage = () => {
       
       {/* Resumen y búsqueda */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <Card>
+        <Card className="shadow-md border border-border/30 bg-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-lg flex items-center">
               <Award className="mr-2 h-5 w-5" /> Resumen de Puntos
@@ -386,7 +397,7 @@ const PointsPage = () => {
           </CardContent>
         </Card>
         
-        <Card className="col-span-2">
+        <Card className="col-span-2 shadow-md border border-border/30 bg-card">
           <CardHeader className="pb-0">
             <div className="mb-4">
               <div className="flex items-center justify-between">
@@ -694,12 +705,12 @@ const PointsPage = () => {
       
       {/* Diálogo para nueva transacción */}
       <Dialog open={showTransactionDialog} onOpenChange={setShowTransactionDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-md bg-card shadow-lg border border-border/30 bg-white">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl">
               {transactionForm.type === "add" ? "Añadir Puntos" : "Canjear Puntos"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground">
               {transactionForm.type === "add" 
                 ? "Agrega puntos a la cuenta del cliente"
                 : "Canjea puntos de la cuenta del cliente"}
@@ -709,21 +720,23 @@ const PointsPage = () => {
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>Tipo de Transacción</Label>
-              <div className="flex rounded-md overflow-hidden">
+              <div className="flex rounded-md overflow-hidden border border-border/30">
                 <Button 
                   type="button"
-                  variant={transactionForm.type === "add" ? "default" : "outline"}
-                  className="flex-1 rounded-none"
+                  variant={transactionForm.type === "add" ? "default" : "ghost"}
+                  className={`flex-1 rounded-none ${transactionForm.type === "add" ? "bg-primary text-white" : "bg-transparent"}`}
                   onClick={() => setTransactionForm({...transactionForm, type: "add"})}
                 >
+                  <Plus className={`mr-2 h-4 w-4 ${transactionForm.type === "add" ? "text-white" : ""}`} />
                   Añadir Puntos
                 </Button>
                 <Button 
                   type="button"
-                  variant={transactionForm.type === "redeem" ? "default" : "outline"}
-                  className="flex-1 rounded-none"
+                  variant={transactionForm.type === "redeem" ? "default" : "ghost"}
+                  className={`flex-1 rounded-none ${transactionForm.type === "redeem" ? "bg-primary text-white" : "bg-transparent"}`}
                   onClick={() => setTransactionForm({...transactionForm, type: "redeem"})}
                 >
+                  <Star className={`mr-2 h-4 w-4 ${transactionForm.type === "redeem" ? "text-white" : ""}`} />
                   Canjear Puntos
                 </Button>
               </div>
@@ -731,44 +744,48 @@ const PointsPage = () => {
             
             <div className="space-y-2">
               <Label htmlFor="customerId">Cliente</Label>
-              <select
-                id="customerId"
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
+              <Select
                 value={transactionForm.customerId}
-                onChange={(e) => setTransactionForm({...transactionForm, customerId: e.target.value})}
+                onValueChange={(value) => setTransactionForm({...transactionForm, customerId: value})}
                 disabled={isLoading}
               >
-                <option value="">Selecciona un cliente...</option>
-                {customers.map((customer) => (
-                  <option key={customer.id} value={customer.id}>
-                    {customer.name} - {customer.points} puntos
-                  </option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Selecciona un cliente..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {customers.map((customer) => (
+                    <SelectItem key={customer.id} value={customer.id}>
+                      {customer.name} - {customer.points} puntos
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="points">Cantidad de Puntos</Label>
               <div className="relative">
-                <Star className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Star className="absolute left-3 top-2.5 h-4 w-4 text-primary/70" />
                 <Input
                   id="points"
                   type="number"
                   min="1"
                   step="1"
                   placeholder="0"
-                  className="pl-8"
+                  className="pl-9 border-primary/30 focus:border-primary/70"
                   value={transactionForm.points}
                   onChange={(e) => setTransactionForm({...transactionForm, points: e.target.value})}
                   disabled={isLoading}
                 />
               </div>
               {transactionForm.type === "redeem" && pointsConfig && (
-                <p className="text-xs text-muted-foreground">
-                  Valor: {transactionForm.points 
-                    ? formatCurrency(parseInt(transactionForm.points) * pointsConfig.pointValueInCurrency)
-                    : formatCurrency(0)}
-                </p>
+                <div className="text-xs bg-primary/5 p-2 rounded border border-primary/20 mt-1">
+                  <p className="font-medium">
+                    Valor: <span className="text-primary">{transactionForm.points 
+                      ? formatCurrency(parseInt(transactionForm.points) * pointsConfig.pointValueInCurrency)
+                      : formatCurrency(0)}</span>
+                  </p>
+                </div>
               )}
             </div>
             
@@ -780,6 +797,7 @@ const PointsPage = () => {
                 value={transactionForm.reason}
                 onChange={(e) => setTransactionForm({...transactionForm, reason: e.target.value})}
                 disabled={isLoading}
+                className="border-primary/30 focus:border-primary/70"
               />
             </div>
             
@@ -791,19 +809,32 @@ const PointsPage = () => {
                 value={transactionForm.description}
                 onChange={(e) => setTransactionForm({...transactionForm, description: e.target.value})}
                 disabled={isLoading}
+                className="border-primary/30 focus:border-primary/70"
               />
             </div>
             
             {transactionForm.type === "redeem" && pointsConfig && transactionForm.customerId && (
-              <div className="p-3 bg-muted rounded-md">
-                <p className="text-sm mb-1">Información de Canje</p>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>Mínimo para canjear: {pointsConfig.minimumRedeemPoints} puntos</p>
-                  <p>Valor por punto: {formatCurrency(pointsConfig.pointValueInCurrency)}</p>
+              <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 shadow-sm">
+                <p className="text-sm font-medium mb-2 flex items-center">
+                  <Star className="mr-1 h-4 w-4 text-primary" /> 
+                  Información de Canje
+                </p>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between items-center border-b border-primary/10 pb-1">
+                    <span className="text-muted-foreground">Mínimo para canjear:</span>
+                    <span className="font-medium">{pointsConfig.minimumRedeemPoints} puntos</span>
+                  </div>
+                  <div className="flex justify-between items-center border-b border-primary/10 pb-1">
+                    <span className="text-muted-foreground">Valor por punto:</span>
+                    <span className="font-medium">{formatCurrency(pointsConfig.pointValueInCurrency)}</span>
+                  </div>
                   {customers.find(c => c.id === transactionForm.customerId) && (
-                    <p>
-                      Puntos disponibles: {customers.find(c => c.id === transactionForm.customerId)?.points} puntos
-                    </p>
+                    <div className="flex justify-between items-center pt-1">
+                      <span className="text-muted-foreground">Puntos disponibles:</span>
+                      <span className="font-medium text-primary">
+                        {customers.find(c => c.id === transactionForm.customerId)?.points} puntos
+                      </span>
+                    </div>
                   )}
                 </div>
               </div>
@@ -813,12 +844,17 @@ const PointsPage = () => {
           <DialogFooter>
             <Button 
               variant="outline" 
+              className="border-primary/30 hover:bg-primary/10"
               onClick={() => setShowTransactionDialog(false)} 
               disabled={isLoading}
             >
               Cancelar
             </Button>
-            <Button onClick={handleCreateTransaction} disabled={isLoading}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+              onClick={handleCreateTransaction} 
+              disabled={isLoading}
+            >
               {isLoading ? "Procesando..." : transactionForm.type === "add" ? "Añadir Puntos" : "Canjear Puntos"}
             </Button>
           </DialogFooter>
@@ -827,10 +863,10 @@ const PointsPage = () => {
       
       {/* Diálogo para configuración */}
       <Dialog open={showConfigDialog} onOpenChange={setShowConfigDialog}>
-        <DialogContent className="max-w-xl">
+        <DialogContent className="max-w-xl bg-card shadow-lg border border-border/30">
           <DialogHeader>
-            <DialogTitle>Configuración del Sistema de Puntos</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-xl">Configuración del Sistema de Puntos</DialogTitle>
+            <DialogDescription className="text-muted-foreground">
               Ajusta los parámetros del sistema de fidelización por puntos
             </DialogDescription>
           </DialogHeader>
@@ -990,12 +1026,17 @@ const PointsPage = () => {
           <DialogFooter>
             <Button 
               variant="outline" 
+              className="border-primary/30 hover:bg-primary/10"
               onClick={() => setShowConfigDialog(false)} 
               disabled={isLoading}
             >
               Cancelar
             </Button>
-            <Button onClick={handleUpdateConfig} disabled={isLoading}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+              onClick={handleUpdateConfig} 
+              disabled={isLoading}
+            >
               {isLoading ? "Procesando..." : "Guardar Configuración"}
             </Button>
           </DialogFooter>
@@ -1004,12 +1045,12 @@ const PointsPage = () => {
       
       {/* Diálogo para ver historial de puntos del cliente */}
       <Dialog open={showCustomerPointsDialog} onOpenChange={setShowCustomerPointsDialog}>
-        <DialogContent>
+        <DialogContent className="max-w-xl bg-card shadow-lg border border-border/30">
           <DialogHeader>
-            <DialogTitle>
+            <DialogTitle className="text-xl">
               Historial de Puntos
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-muted-foreground">
               {selectedCustomer?.name}
             </DialogDescription>
           </DialogHeader>

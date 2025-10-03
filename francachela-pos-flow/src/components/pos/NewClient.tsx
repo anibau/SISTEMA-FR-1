@@ -1,164 +1,278 @@
 
 import { useForm } from "react-hook-form";
 import { Button } from "../ui/button";
-import { X } from "lucide-react";
 import { Input } from "../ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Phone, User, CreditCard, Calendar } from "lucide-react";
 
 interface NewClientProps {
-  isOpen: boolean;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSubmit?: (data: ClientFormData) => void;
 }
 
 interface ClientFormData {
   dni: string;
-  nombres: string;
-  apellidos: string;
-  telefono: string;
-  birthdate: Date;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  birthdate: string;
+  creditLimit?: number;
 }
 
-const NewClient: React.FC<NewClientProps> = ({ isOpen, onClose }) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset
-  } = useForm<ClientFormData>();
+const NewClient: React.FC<NewClientProps> = ({ 
+  open, 
+  onOpenChange,
+  onSubmit
+}) => {
+  const form = useForm<ClientFormData>({
+    defaultValues: {
+      dni: "",
+      name: "",
+      phone: "",
+      email: "",
+      address: "",
+      birthdate: "",
+      creditLimit: 0
+    }
+  });
 
-  const onSubmit = (data: ClientFormData) => {
-    console.log(data);
-    // Aquí puedes agregar la lógica para manejar el envío del formulario
-    reset(); // Limpiar el formulario
-    onClose(); // Cerrar el modal después de enviar
+  const handleSubmit = (data: ClientFormData) => {
+    if (onSubmit) {
+      onSubmit(data);
+    }
+    form.reset();
+    onOpenChange(false);
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md relative">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 text-gray-500 hover:text-gray-700"
-        >
-          <X size={24} />
-        </button>
-
-        <h2 className="text-xl font-bold mb-6">Nuevo Cliente</h2>
-
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="space-y-2">
-            <label htmlFor="dni" className="text-sm font-medium">DNI</label>
-            <Input
-              id="dni"
-              type="text"
-              {...register("dni", {
-                required: "El DNI es requerido",
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl">Nuevo Cliente</DialogTitle>
+          <DialogDescription>
+            Registra un nuevo cliente en el sistema. Completa los datos requeridos.
+          </DialogDescription>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="dni"
+              rules={{ 
+                required: "El DNI es requerido", 
                 pattern: {
                   value: /^\d{8}$/,
                   message: "El DNI debe tener 8 dígitos"
                 }
-              })}
-              className={errors.dni ? "border-red-500" : ""}
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>DNI</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <CreditCard className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="12345678" className="pl-9" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.dni && <span className="text-sm text-red-500">{String(errors.dni.message)}</span>}
-          </div>
 
-          <div className="space-y-2">
-            <label htmlFor="nombres" className="text-sm font-medium">Nombres</label>
-            <Input
-              id="nombres"
-              type="text"
-              {...register("nombres", { required: "Los nombres son requeridos" })}
-              className={errors.nombres ? "border-red-500" : ""}
+            <FormField
+              control={form.control}
+              name="name"
+              rules={{ required: "El nombre completo es requerido" }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Nombre completo</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <User className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="Nombre y apellidos" className="pl-9" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.nombres && <span className="text-sm text-red-500">{String(errors.nombres.message)}</span>}
-          </div>
 
-          <div className="space-y-2">
-            <label htmlFor="apellidos" className="text-sm font-medium">Apellidos</label>
-            <Input
-              id="apellidos"
-              type="text"
-              {...register("apellidos", { required: "Los apellidos son requeridos" })}
-              className={errors.apellidos ? "border-red-500" : ""}
-            />
-            {errors.apellidos && <span className="text-sm text-red-500">{String(errors.apellidos.message)}</span>}
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="telefono" className="text-sm font-medium">Teléfono</label>
-            <Input
-              id="telefono"
-              type="tel"
-              {...register("telefono", { 
+            <FormField
+              control={form.control}
+              name="phone"
+              rules={{ 
                 required: "El teléfono es requerido",
                 pattern: {
                   value: /^\d{9}$/,
                   message: "El teléfono debe tener 9 dígitos"
                 }
-              })}
-              className={errors.telefono ? "border-red-500" : ""}
-            />
-            {errors.telefono && <span className="text-sm text-red-500">{String(errors.telefono.message)}</span>}
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="birthdate" className="text-sm font-medium">Fecha nacimiento</label>
-            <Input
-              id="birthdate"
-              type="date"
-              max={new Date().toISOString().split('T')[0]}
-              {...register("birthdate", {
-                required: "La fecha de nacimiento es requerida",
-                validate: {
-                  futureDate: (value) => {
-                    const date = new Date(value);
-                    const today = new Date();
-                    return date <= today || "La fecha no puede ser futura";
-                  },
-                  minAge: (value) => {
-                    const date = new Date(value);
-                    const today = new Date();
-                    
-                    // Calculamos la fecha hace 18 años
-                    const minDate = new Date(today);
-                    minDate.setFullYear(today.getFullYear() - 18);
-                    
-                    // Si la fecha de nacimiento es posterior a minDate, la persona es menor de 18
-                    return date <= minDate || "Debe ser mayor de 18 años";
-                  }
-                }
-              })}
-              className={errors.birthdate ? "border-red-500" : ""}
-            />
-            {errors.birthdate && (
-              <span className="text-sm text-red-500">
-                {errors.birthdate.message}
-              </span>
-            )}
-          </div>
-
-          <div className="flex justify-end gap-2 mt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                reset();
-                onClose();
               }}
-            >
-              Cancelar
-            </Button>
-            <Button
-              type="submit"
-            >
-              Guardar
-            </Button>
-          </div>
-        </form>
-      </div>
-    </div>
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Teléfono</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <Phone className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input placeholder="987654321" className="pl-9" {...field} />
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="email"
+                rules={{ 
+                  pattern: {
+                    value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                    message: "Email inválido"
+                  }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input placeholder="cliente@example.com" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Opcional
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl>
+                      <Input placeholder="Av. Ejemplo 123" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Opcional
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="birthdate"
+                rules={{
+                  required: "La fecha de nacimiento es requerida",
+                  validate: {
+                    futureDate: (value) => {
+                      const date = new Date(value);
+                      const today = new Date();
+                      return date <= today || "La fecha no puede ser futura";
+                    },
+                    minAge: (value) => {
+                      const date = new Date(value);
+                      const today = new Date();
+                      
+                      // Calculamos la fecha hace 18 años
+                      const minDate = new Date(today);
+                      minDate.setFullYear(today.getFullYear() - 18);
+                      
+                      // Si la fecha de nacimiento es posterior a minDate, la persona es menor de 18
+                      return date <= minDate || "Debe ser mayor de 18 años";
+                    }
+                  }
+                }}
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Fecha de nacimiento</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Calendar className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input 
+                          type="date" 
+                          max={new Date().toISOString().split('T')[0]} 
+                          className="pl-9" 
+                          {...field} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="creditLimit"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Límite de crédito (S/.)</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground">S/.</span>
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          placeholder="0.00" 
+                          className="pl-9"
+                          {...field}
+                          onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)} 
+                        />
+                      </div>
+                    </FormControl>
+                    <FormDescription>
+                      Opcional. Crédito máximo que puede tener este cliente.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <DialogFooter className="pt-4">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
+                  form.reset();
+                  onOpenChange(false);
+                }}
+                className="mr-2"
+              >
+                Cancelar
+              </Button>
+              <Button type="submit">
+                Guardar Cliente
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

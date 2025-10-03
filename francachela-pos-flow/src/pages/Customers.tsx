@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import NewClient from "@/components/pos/NewClient";
 import {
   Search,
   Plus,
@@ -111,6 +112,7 @@ const Customers = () => {
   const [customers, setCustomers] = useState<Customer[]>(sampleCustomers);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("Todos");
+  const [isNewClientOpen, setIsNewClientOpen] = useState(false);
 
   const statusOptions = ["Todos", "active", "vip", "inactive"];
 
@@ -159,6 +161,29 @@ const Customers = () => {
     return diffDays >= 0 && diffDays <= 7;
   };
 
+  // Manejador para la creación de clientes
+  const handleCreateClient = (data: any) => {
+    const newClient: Customer = {
+      id: (customers.length + 1).toString(),
+      name: data.name,
+      dni: data.dni,
+      phone: data.phone,
+      email: data.email,
+      address: data.address,
+      birthday: data.birthdate ? new Date(data.birthdate) : undefined,
+      points: 0,
+      totalSpent: 0,
+      totalPurchases: 0,
+      lastPurchase: new Date(),
+      creditLimit: data.creditLimit || 0,
+      currentDebt: 0,
+      status: 'active',
+      registeredAt: new Date()
+    };
+    
+    setCustomers([newClient, ...customers]);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -170,12 +195,19 @@ const Customers = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2 mt-4 md:mt-0">
-          <Button className="pos-button">
+          <Button className="pos-button" onClick={() => setIsNewClientOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nuevo Cliente
           </Button>
         </div>
       </div>
+      
+      {/* Modal para nuevo cliente */}
+      <NewClient
+        open={isNewClientOpen}
+        onOpenChange={setIsNewClientOpen}
+        onSubmit={handleCreateClient}
+      />
 
       {/* Estadísticas de clientes */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

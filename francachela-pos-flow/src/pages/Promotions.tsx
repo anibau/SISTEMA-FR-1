@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import NewPromotion from "@/components/pos/NewPromotion";
 import {
   Search,
   Plus,
@@ -159,6 +160,7 @@ const Promotions = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedType, setSelectedType] = useState("Todos");
   const [selectedStatus, setSelectedStatus] = useState("Todos");
+  const [isNewPromotionOpen, setIsNewPromotionOpen] = useState(false);
 
   const promotionTypes = ["Todos", "percentage", "fixed_amount", "buy_x_get_y", "combo", "birthday"];
   const statusOptions = ["Todos", "active", "inactive", "expired"];
@@ -220,6 +222,29 @@ const Promotions = () => {
     return promotion.isActive && promotion.startDate <= now && promotion.endDate >= now;
   };
 
+  // Manejador para la creación de promociones
+  const handleCreatePromotion = (data: any) => {
+    const newPromotion: Promotion = {
+      id: (promotions.length + 1).toString(),
+      name: data.name,
+      description: data.description,
+      type: data.type,
+      value: data.value,
+      minAmount: data.minAmount,
+      buyQuantity: data.buyQuantity,
+      getQuantity: data.getQuantity,
+      applicableProducts: data.applicableProducts.split(',').map((p: string) => p.trim()),
+      startDate: new Date(data.startDate),
+      endDate: new Date(data.endDate),
+      isActive: true,
+      usageCount: 0,
+      maxUsage: data.maxUsage,
+      conditions: data.conditions
+    };
+    
+    setPromotions([newPromotion, ...promotions]);
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -231,12 +256,19 @@ const Promotions = () => {
           </p>
         </div>
         <div className="flex items-center space-x-2 mt-4 md:mt-0">
-          <Button className="pos-button">
+          <Button className="pos-button" onClick={() => setIsNewPromotionOpen(true)}>
             <Plus className="h-4 w-4 mr-2" />
             Nueva Promoción
           </Button>
         </div>
       </div>
+      
+      {/* Modal para nueva promoción */}
+      <NewPromotion
+        open={isNewPromotionOpen}
+        onOpenChange={setIsNewPromotionOpen}
+        onSubmit={handleCreatePromotion}
+      />
 
       {/* Estadísticas */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

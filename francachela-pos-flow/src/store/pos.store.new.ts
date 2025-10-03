@@ -21,6 +21,7 @@ interface POSState {
   deleteTicket: (ticketId: string) => void;
   restoreTicket: (ticketId: string) => void;
   setClientToTicket: (ticketId: string, client: Client) => void;
+  updateTicketObservations: (ticketId: string, observations: string) => void;
   processSale: (ticketId: string, paymentMethod: string) => void;
   filterProducts: (searchTerm: string, category: string) => Product[];
   setSelectedCategory: (category: string) => void;
@@ -51,7 +52,8 @@ export const usePOSStore = create<POSState>((set, get) => ({
       items: [],
       total: 0,
       status: 'active',
-      createdAt: new Date()
+      createdAt: new Date(),
+      observations: ""
     };
     set((state): Partial<POSState> => ({
       tickets: [...state.tickets, newTicket],
@@ -206,17 +208,36 @@ export const usePOSStore = create<POSState>((set, get) => ({
       //   status: 'completed'
       // });
 
-      showSuccess(`Venta procesada con ${paymentMethod}. Total: S/. ${ticket.total.toFixed(2)}`);
-
+      // No mostrar notificación de éxito
+      
+      // Marcar el ticket como completado
       set(state => ({
         tickets: state.tickets.map(t =>
           t.id === ticketId
-            ? { ...t, items: [], total: 0, status: 'completed' }
+            ? { ...t, status: 'completed' }
             : t
         )
       }));
-
-      get().createNewTicket();
+      
+      // Limpiar el ticket actual sin crear uno nuevo
+      const clearedTicket: Ticket = {
+        id: ticketId,
+        items: [],
+        total: 0,
+        status: 'active',
+        createdAt: new Date(),
+        observations: ""
+      };
+      
+      set(state => ({
+        tickets: state.tickets.map(t => 
+          t.id === ticketId
+            ? clearedTicket
+            : t
+        )
+      }));
+      
+      // No crear un nuevo ticket automáticamente
     } catch (error) {
       console.error('Error processing sale:', error);
       showError('Error al procesar la venta');
@@ -288,5 +309,15 @@ export const usePOSStore = create<POSState>((set, get) => ({
       console.error('Error searching clients:', error);
       return [];
     }
+  },
+
+  updateTicketObservations: (ticketId, observations) => {
+    set(state => ({
+      tickets: state.tickets.map(ticket =>
+        ticket.id === ticketId
+          ? { ...ticket, observations }
+          : ticket
+      )
+    }));
   },
 }));

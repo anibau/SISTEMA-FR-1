@@ -358,23 +358,31 @@ const ProductsManagementPage = () => {
   };
   
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-6 bg-background min-h-screen">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold">Gestión de Productos</h1>
         
-        <div className="flex space-x-2">
+        <div className="flex space-x-3">
           {isAdmin && (
-            <Button onClick={() => handleOpenBulkPriceModal()} disabled={selectedProducts.length === 0}>
+            <Button 
+              variant="outline"
+              className="border-primary/30 hover:bg-primary/10"
+              onClick={() => handleOpenBulkPriceModal()} 
+              disabled={selectedProducts.length === 0}
+            >
               <Tag className="mr-2 h-4 w-4" /> Actualizar Precios ({selectedProducts.length})
             </Button>
           )}
           
           {isAdmin && (
-            <Button onClick={() => {
-              resetProductForm();
-              setSelectedProduct(null);
-              setShowProductModal(true);
-            }}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white shadow-md"
+              onClick={() => {
+                resetProductForm();
+                setSelectedProduct(null);
+                setShowProductModal(true);
+              }}
+            >
               <Plus className="mr-2 h-4 w-4" /> Nuevo Producto
             </Button>
           )}
@@ -383,18 +391,18 @@ const ProductsManagementPage = () => {
       
       {/* Pestañas */}
       <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="productos">Productos</TabsTrigger>
-          <TabsTrigger value="stock">Control de Stock</TabsTrigger>
-          <TabsTrigger value="categorias">Categorías</TabsTrigger>
-          <TabsTrigger value="estadisticas">Estadísticas</TabsTrigger>
+        <TabsList className="mb-6 bg-card/50 shadow-sm border border-border/20 p-1">
+          <TabsTrigger value="productos" className="data-[state=active]:bg-primary data-[state=active]:text-white">Productos</TabsTrigger>
+          <TabsTrigger value="stock" className="data-[state=active]:bg-primary data-[state=active]:text-white">Control de Stock</TabsTrigger>
+          <TabsTrigger value="categorias" className="data-[state=active]:bg-primary data-[state=active]:text-white">Categorías</TabsTrigger>
+          <TabsTrigger value="estadisticas" className="data-[state=active]:bg-primary data-[state=active]:text-white">Estadísticas</TabsTrigger>
         </TabsList>
         
         {/* Pestaña de Productos */}
         <TabsContent value="productos">
           <div className="grid grid-cols-1 gap-6">
             {/* Filtros y búsqueda */}
-            <Card>
+            <Card className="shadow-md border border-border/30 bg-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center">
                   <Filter className="mr-2 h-5 w-5" /> Filtros
@@ -464,7 +472,7 @@ const ProductsManagementPage = () => {
             </Card>
             
             {/* Tabla de productos */}
-            <Card>
+            <Card className="shadow-md border border-border/30 bg-card">
               <CardHeader className="pb-3">
                 <CardTitle className="text-lg flex items-center justify-between">
                   <div className="flex items-center">
@@ -1205,11 +1213,15 @@ const ProductsManagementPage = () => {
           <DialogFooter>
             <Button
               variant="outline"
+              className="border-primary/30 hover:bg-primary/10"
               onClick={() => setShowProductModal(false)}
             >
               Cancelar
             </Button>
-            <Button onClick={handleProductSubmit}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+              onClick={handleProductSubmit}
+            >
               {selectedProduct ? "Guardar Cambios" : "Crear Producto"}
             </Button>
           </DialogFooter>
@@ -1229,12 +1241,14 @@ const ProductsManagementPage = () => {
           <DialogFooter>
             <Button
               variant="outline"
+              className="border-primary/30 hover:bg-primary/10"
               onClick={() => setShowDeleteModal(false)}
             >
               Cancelar
             </Button>
             <Button 
               variant="destructive" 
+              className="shadow-sm"
               onClick={handleDeleteConfirm}
             >
               Eliminar
@@ -1328,11 +1342,15 @@ const ProductsManagementPage = () => {
           <DialogFooter>
             <Button
               variant="outline"
+              className="border-primary/30 hover:bg-primary/10"
               onClick={() => setShowStockModal(false)}
             >
               Cancelar
             </Button>
-            <Button onClick={handleStockSubmit}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+              onClick={handleStockSubmit}
+            >
               Confirmar Ajuste
             </Button>
           </DialogFooter>
@@ -1413,11 +1431,15 @@ const ProductsManagementPage = () => {
           <DialogFooter>
             <Button
               variant="outline"
+              className="border-primary/30 hover:bg-primary/10"
               onClick={() => setShowBulkPriceModal(false)}
             >
               Cancelar
             </Button>
-            <Button onClick={handleBulkPriceUpdate}>
+            <Button 
+              className="bg-primary hover:bg-primary/90 text-white shadow-sm"
+              onClick={handleBulkPriceUpdate}
+            >
               Actualizar Precios
             </Button>
           </DialogFooter>

@@ -63,7 +63,8 @@ const POS = () => {
     setSelectedCategory,
     loadProducts,
     loadClients,
-    searchClients
+    searchClients,
+    updateTicketObservations
   } = usePOSStore();
 
   // Obtener ticket activo
@@ -181,8 +182,34 @@ const POS = () => {
           onUpdateQuantity={updateQuantity}
           onRemoveItem={removeFromCart}
           onClientClick={() => setShowClientModal(true)}
-          onProcessPayment={method => processSale(activeTicketId, method)}
+          onProcessPayment={method => {
+            if (activeTicketId) {
+              const ticket = tickets.find(t => t.id === activeTicketId);
+              processSale(activeTicketId, method);
+              
+              // Mostrar un mensaje específico según el método de pago
+              const methodNames = {
+                "efectivo": "Efectivo",
+                "tarjeta": "Tarjeta",
+                "yape": "Yape",
+                "plin": "Plin",
+              };
+              
+              const methodName = methodNames[method as keyof typeof methodNames] || method;
+              const total = ticket?.total || 0;
+              showSuccess(`Venta procesada con ${methodName}. Total: S/. ${total.toFixed(2)}`);
+            }
+          }}
+          onProcessSale={() => {
+            // This now just shows the payment modal
+            // Payment processing happens in onProcessPayment
+          }}
           onSaveTicket={() => showSuccess("Ticket guardado")}
+          onUpdateObservations={(observations) => {
+            if (activeTicketId) {
+              updateTicketObservations(activeTicketId, observations);
+            }
+          }}
         />
       </div>
 
@@ -274,7 +301,7 @@ const POS = () => {
           </div>
         </div>
       )}
-      {showNewClientModal && <NewClient isOpen={showNewClientModal} onClose={offNewClient} />}
+      {showNewClientModal && <NewClient open={showNewClientModal} onOpenChange={offNewClient} />}
 
     </div>
   );

@@ -1,4 +1,4 @@
-import { apiClient, extractData, extractPaginatedData } from './api';
+import { apiClient, extractData, extractPaginatedData, PaginatedResponse } from './api';
 import { mockApi } from './mocks';
 import { Sale, PaginationParams, ApiResponse } from '@/types/pos.types';
 
@@ -27,7 +27,7 @@ export class SalesService {
     if (params?.sortBy) queryParams.append('sortBy', params.sortBy);
     if (params?.sortOrder) queryParams.append('sortOrder', params.sortOrder);
 
-    const response = await apiClient.get<ApiResponse<Sale[]>>(`/ventas?${queryParams}`);
+    const response = await apiClient.get<PaginatedResponse<Sale>>(`/ventas?${queryParams}`);
     return extractPaginatedData(response);
   }
 
@@ -276,10 +276,10 @@ export class SalesService {
     if (filters?.customerId) queryParams.append('customerId', filters.customerId);
     if (filters?.status) queryParams.append('status', filters.status);
 
-    const response = await apiClient.get(`/ventas/export?${queryParams}`, {
+    const response = await apiClient.get<Blob>(`/ventas/export?${queryParams}`, {
       responseType: 'blob'
     });
-    return response.data;
+    return response.data as Blob;
   }
 }
 
